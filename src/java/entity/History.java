@@ -3,15 +3,23 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Entity;
+package entity;
 
+import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 /**
  *
  * @author artur
  */
-public class History {
+@Entity
+public class History implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private Person person;
     private Product product;
@@ -21,8 +29,7 @@ public class History {
     public History() {
     }
 
-    public History(long id, Person person, Product product, Date takeOnDate, Date returnDate) {
-        this.id = id;
+    public History( Person person, Product product, Date takeOnDate, Date returnDate) {
         this.person = person;
         this.product = product;
         this.takeOnDate = takeOnDate;

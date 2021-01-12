@@ -16,5 +16,10 @@
         <p>${info}</p>
         <br>
         <a href="addProduct">Добавить товар</a></br>
+        <a href="addPerson">Добавить покупателя</a></br>
+        <a href="listProducts">Список товаров</a></br>
+        <a href="listPersons">Список покупателей</a></br>
+        <a href="buyProduct">Купить товар</a></br>
+        <a href="addMoney">Пополнить баланс</a></br> 
     </body>
 </html>
