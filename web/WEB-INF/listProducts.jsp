@@ -13,12 +13,15 @@
         <title>Список Товаров</title>
     </head>
     <body>
-        <h1>Список товаро магазина:</h1>  
-        <select name="productId" multiple="true">
-            <option value="#">Выберите книгу: </option>
-            <c:forEach var="product" varStatus="status" items="${listProducts}">
-            <option value="${product.id}"> ${status.index + 1}. "${product.name}". ${product.count}. ${product.quantity}</option>
-            </c:forEach> 
-        </select>
+        <h1>Список товаро магазина:</h1>
+        <form action="editProductForm" method="POST">
+            <select name="productId" multiple="true">
+                <option value="">Выберите товар: </option>
+                <c:forEach var="product" varStatus="status" items="${listProducts}">
+                    <option value="${product.id}"> ${status.index + 1}. "${product.name}". ${product.count}. ${product.quantity}</option>
+                </c:forEach> 
+            </select>
+            <input type="submit" value="Изменить выбранный товар">
+        </form>
     </body>
 </html>

@@ -18,6 +18,8 @@
             Фамилия: <input type="text" name="lastname" value="${lastname}"><br>
             Номер телефона: <input type="text" name="phone" value="${phone}"><br>
             Бюджет: <input type="text" name="cash" value="${cash}"><br>
+            Логин: <input type="text" name="login" value="${login}"><br>
+            Пароль: <input type="password" name="password" value=""><br>
             <input type="submit" name="submit" value="Отправить"><br>
         </form>
     </body>

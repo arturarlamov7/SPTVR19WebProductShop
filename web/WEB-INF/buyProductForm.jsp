@@ -14,7 +14,7 @@
     </head>
     <body>
         <h1>Выберите</h1>
-        <form action="buyProduct" method="POST"
+        <form action="buyProduct" method="POST">
             <select name="productId">
                 <option value="#">Выберите товар: </option>
                 <c:forEach var="product" varStatus="status" items="${listProducts}">
