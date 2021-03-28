@@ -7,7 +7,9 @@ package servlets;
 
 import entity.Person;
 import entity.Product;
+import entity.Role;
 import entity.User;
+import entity.UserRoles;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
@@ -21,18 +23,20 @@ import javax.servlet.http.HttpSession;
 import session.HistoryFacade;
 import session.PersonFacade;
 import session.ProductFacade;
+import session.RoleFacade;
 import session.UserFacade;
+import session.UserRolesFacade;
 
 /**
  *
  * @author artur
  */
-@WebServlet(name = "LoginServlet", urlPatterns = {
+@WebServlet(name = "LoginServlet", loadOnStartup = 1, urlPatterns = {
     "/showLoginForm",
     "/login",
     "/logout",
     "/addPerson",
-    "/createPeson",
+    "/createPerson",
     "/listProducts"
 })
 public class LoginServlet extends HttpServlet {
@@ -44,6 +48,36 @@ public class LoginServlet extends HttpServlet {
     private ProductFacade productFacade;
     @EJB
     private HistoryFacade historyFacade;
+    @EJB private RoleFacade roleFacade;
+    @EJB private UserRolesFacade userRolesFacade;
+   
+    @Override
+    public void init() throws ServletException {
+        super.init(); 
+        if(userFacade.findAll().size() > 0) return;
+        //Super Admin
+        Person person = new Person("Artur", "Arlamov", "58592275", 100);
+        personFacade.create(person);
+        User user = new User ("admin", "12345", person);
+        userFacade.create(user);
+        UserRoles userRoles = new UserRoles();
+        userRoles.setUser(user);
+        Role role = new Role ("ADMINISTRATOR");
+        roleFacade.create(role);
+        userRoles.setRole(role);
+        userRolesFacade.create(userRoles);
+        role = new Role ("MANAGER");
+        roleFacade.create(role);
+        userRoles.setRole(role);
+        userRolesFacade.create(userRoles);
+        role = new Role ("CUSTOMER");
+        roleFacade.create(role);
+        userRoles.setRole(role);
+        userRolesFacade.create(userRoles); 
+    }
+    
+    
+    
             
 
     /**
@@ -61,6 +95,8 @@ public class LoginServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         
         String path = request.getServletPath();
+        
+        
         
         switch (path) {
             case "/showLoginForm":

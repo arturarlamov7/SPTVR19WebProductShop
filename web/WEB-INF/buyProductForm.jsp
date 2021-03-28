@@ -13,7 +13,7 @@
         <title>Покупка товара</title>
     </head>
     <body>
-        <h1>Выберите</h1>
+        <h1>Купить товар</h1>
         <form action="buyProduct" method="POST">
             <select name="productId">
                 <option value="#">Выберите товар: </option>
@@ -22,14 +22,8 @@
                 </c:forEach> 
             </select>
             <br>
-            <select name="readerId">
-                <option value="#">Выберите покупателя: </option>
-                <c:forEach var="person" varStatus="status" items="${listPersons}">
-                    <option value="${person.id}"> ${status.index + 1}. "${person.name}". ${person.lastname}. ${person.cash}</option>
-                </c:forEach> 
-            </select>
             <br>
-            <input type="submit" value="выдать товар покупателю">
+            <input type="submit" value="Купить">
         </form>
     </body>
 </html>

@@ -24,24 +24,16 @@ public class History implements Serializable {
     private Person person;
     private Product product;
     private Date takeOnDate;
-    private Date returnDate;
+
 
     public History() {
     }
 
-    public History( Person person, Product product, Date takeOnDate, Date returnDate) {
+    public History( Person person, Product product, Date takeOnDate) {
         this.person = person;
         this.product = product;
         this.takeOnDate = takeOnDate;
-        this.returnDate = returnDate;
-    }
 
-    public Date getReturnDate() {
-        return returnDate;
-    }
-
-    public void setReturnDate(Date returnDate) {
-        this.returnDate = returnDate;
     }
 
     public Person getPerson() {
@@ -74,7 +66,6 @@ public class History implements Serializable {
                 + ", person=" + person 
                 + ", product=" + product 
                 + ", takeOnDate=" + takeOnDate
-                + ", returnDate=" + returnDate 
                 + '}';
     }
 

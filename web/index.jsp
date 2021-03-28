@@ -18,7 +18,7 @@
         <a href="showLoginForm">Войти</a></br>
         <a href="logout">Выйти</a></br>
         <a href="addProduct">Добавить товар</a></br>
-        <a href="addPerson">Зарегестрироваться нового пользователя</a></br>
+        <a href="addPerson">Зарегестрироваться</a></br>
         <a href="listProducts">Список товаров</a></br>
         <a href="listPersons">Список покупателей</a></br>
         <a href="buyProduct">Купить товар</a></br>

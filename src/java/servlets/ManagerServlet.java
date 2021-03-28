@@ -5,12 +5,11 @@
  */
 package servlets;
 
-import entity.History;
 import entity.Person;
 import entity.Product;
 import entity.User;
 import java.io.IOException;
-import java.util.GregorianCalendar;
+import java.io.PrintWriter;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -24,19 +23,18 @@ import session.PersonFacade;
 import session.ProductFacade;
 import session.UserFacade;
 
-
 /**
  *
  * @author artur
  */
-@WebServlet(name = "UserServlet", urlPatterns = {
-    "/buyProductForm",
-    "/buyProduct",
-    "/addMoneyToPerson",
-    "/addMoney",
+@WebServlet(name = "ManagerServlet", urlPatterns = {
+    "/addProduct",
+    "/createProduct",
+    "/editProductForm",
+    "/editProduct",
+    "/listPersons",
 })
-
-public class UserServlet extends HttpServlet {
+public class ManagerServlet extends HttpServlet {
     @EJB
     private ProductFacade productFacade;
     @EJB
@@ -45,7 +43,6 @@ public class UserServlet extends HttpServlet {
     private HistoryFacade historyFacade;
     @EJB
     private UserFacade userFacade;
-
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -74,63 +71,83 @@ public class UserServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/showLoginForm.jsp").forward(request, response); 
             return;
         }
+        
+        if (!"manager".equals(user.getLogin())) {
+            request.setAttribute("info", "У вас нет прав! Пожалуйста войдите в систему!");
+            request.getRequestDispatcher("/WEB-INF/showLoginForm.jsp").forward(request, response); 
+            return;           
+        }
         String path = request.getServletPath();
         
-        switch (path) {               
-            case "/buyProductForm":
-                List<Product> listProducts = productFacade.findAll();
-                request.setAttribute("listProducts", listProducts);
-                request.getRequestDispatcher("/WEB-INF/buyProductForm.jsp").forward(request, response);
+        switch (path) {
+            case "/addProduct":
+                request.getRequestDispatcher("/WEB-INF/addProductForm.jsp").forward(request, response); 
                 break;
                 
-            case "/buyProduct":
-                String productId = request.getParameter("productId");
-                String personId = request.getParameter("personId");
+            case "/createProduct":
+                String name = request.getParameter("name");
                 String count = request.getParameter("count");
                 String quantity = request.getParameter("quantity");
                 
-                Product product = productFacade.find(Long.parseLong(productId));
-                Person person = personFacade.find(Long.parseLong(personId));
-                
-                personFacade.edit(person);
-                product.setQuantity(product.getQuantity()- 1);
-                productFacade.edit(product);
-                History history = new History(person, product, new GregorianCalendar().getTime());
-                historyFacade.create(history);               
-                request.setAttribute("info", "Товар куплен!");
-                request.getRequestDispatcher("/index.jsp").forward(request, response);
-                break;
-                                   
-            case "/addMoneyToPerson":
-                List<Person>listPersons = personFacade.findAll();
-                request.setAttribute("listPersons", listPersons);
-                request.getRequestDispatcher("/WEB-INF/addMoneyToPerson.jsp").forward(request, response);
-                break;
-                
-            case "/addMoney":
-                String money = request.getParameter("money");
-                personId = request.getParameter("personId");
-                
-                if ("".equals(personId) || personId == null
-                        || money == null || "".equals(money)                  
+                if ("".equals(name) || name == null
+                        || "".equals(count) || count == null
+                        || "".equals(quantity) || quantity == null
                         ){
+                    request.setAttribute("info", "Пожалуйста заполните все поля формы!");
+                    request.setAttribute("name", name);
+                    request.setAttribute("count", count);
+                    request.setAttribute("quantity", quantity);
                     
-                    request.setAttribute("info", "Заполните все поля!");
-                    listPersons = personFacade.findAll();
-                    request.setAttribute("listPersons", listPersons);
-                    request.getRequestDispatcher("/WEB-INF/addMoneyToPerson.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/addProductForm.jsp").forward(request, response);
                     break;
                 }
-                person = personFacade.find(Long.parseLong(personId));
-                person.setCash(person.getCash()+Integer.parseInt(money));
-                personFacade.edit(person);
-
-                request.setAttribute("info", "Кошелек пополнен!");
-                request.getRequestDispatcher("index.jsp").forward(request, response);
-                break;                           
-        }   
+                Product product = new Product( name, Integer.parseInt(count) , Integer.parseInt(quantity));
+                productFacade.create(product);
+                request.setAttribute("info","Добавлен товар" + product.toString());
+                request.getRequestDispatcher("/index.jsp").forward(request, response);
+                break;
+                
+            case "/editProductForm":
+                String productId = request.getParameter("productId");
+                product = productFacade.find(Long.parseLong(productId));
+                request.setAttribute("product", product);
+                request.getRequestDispatcher("/WEB-INF/editProductForm.jsp").forward(request, response);
+                break;
+                
+            case "/editProduct": 
+                productId = request.getParameter("productId");
+                product = productFacade.find(Long.parseLong(productId));
+                name = request.getParameter("name");
+                count = request.getParameter("count");
+                quantity = request.getParameter("quantity");
+                if("".equals(name) || name == null 
+                        || "".equals(count) || count == null
+                        || "".equals(quantity) || quantity == null){
+                    request.setAttribute("info","Поля не должны быть пустыми");
+                    request.setAttribute("productId", product.getId());
+                    request.getRequestDispatcher("/editProductForm").forward(request, response);
+                    break; 
+                }
+                product.setName(name);
+                product.setCount(Integer.parseInt(count));
+                product.setQuantity(Integer.parseInt(quantity));
+                productFacade.edit(product);
+                request.setAttribute("info","Товар отредактирован");
+                request.setAttribute("productId", product.getId());
+                request.getRequestDispatcher("/editProductForm").forward(request, response);         
+                break;  
+                              
+            case "/listPersons":
+                List<Person> listPersons = personFacade.findAll();
+                request.setAttribute("listPersons", listPersons);
+                request.getRequestDispatcher("/WEB-INF/listPersons.jsp").forward(request, response);
+                break;
+                
+                
     }
-
+        
+    }
+    
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
