@@ -7,10 +7,14 @@ package servlets;
 
 import entity.Person;
 import entity.Product;
+import entity.Role;
 import entity.User;
+import entity.UserRoles;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,6 +25,7 @@ import javax.servlet.http.HttpSession;
 import session.HistoryFacade;
 import session.PersonFacade;
 import session.ProductFacade;
+import session.RoleFacade;
 import session.UserFacade;
 import session.UserRolesFacade;
 
@@ -28,14 +33,12 @@ import session.UserRolesFacade;
  *
  * @author artur
  */
-@WebServlet(name = "ManagerServlet", urlPatterns = {
-    "/addProduct",
-    "/createProduct",
-    "/editProductForm",
-    "/editProduct",
-
+@WebServlet(name = "AdminServlet", urlPatterns = {   
+    "/listPersons",
+    "/adminPanel",
+    "/setRoleToUser"
 })
-public class ManagerServlet extends HttpServlet {
+public class AdminServlet extends HttpServlet {
     @EJB
     private ProductFacade productFacade;
     @EJB
@@ -45,6 +48,9 @@ public class ManagerServlet extends HttpServlet {
     @EJB
     private UserFacade userFacade;
     @EJB private UserRolesFacade userRolesFacade;
+    @EJB private RoleFacade roleFacade;
+    
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -76,74 +82,51 @@ public class ManagerServlet extends HttpServlet {
         
         boolean isRole = userRolesFacade.isRole("MANAGER", user);
         if(!isRole ){
-            request.setAttribute("info", "У вас нет прав! Пожалуйста войдите в систему!");
+            request.setAttribute("info", "У вас нет прав! Пожалуйста войдите в систему с  соответствующими правами!");
             request.getRequestDispatcher("showLoginForm").forward(request, response); 
             return;       
         }
         String path = request.getServletPath();
         
         switch (path) {
-            case "/addProduct":
-                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("addProduct")).forward(request, response); 
+            case "/listPersons":
+                List<Person> listPersons = personFacade.findAll();
+                request.setAttribute("listPersons", listPersons);
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("listPersons")).forward(request, response);
                 break;
                 
-            case "/createProduct":
-                String name = request.getParameter("name");
-                String count = request.getParameter("count");
-                String quantity = request.getParameter("quantity");
+            case "/adminPanel":
+                List<Role> listRoles = roleFacade.findAll();
+                request.setAttribute("listRoles", listRoles);
+                List<User> listUsers = userFacade.findAll();
+                Map<User,List<Role>> usersMap = new HashMap<>();
+                for(User u : listUsers) {
+                    usersMap.put(u, userRolesFacade.getRolesForUser(u));
+                }
+                request.setAttribute("usersMap", usersMap);
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("adminPanel")).forward(request, response);
+                break;
                 
-                if ("".equals(name) || name == null
-                        || "".equals(count) || count == null
-                        || "".equals(quantity) || quantity == null
-                        ){
-                    request.setAttribute("info", "Пожалуйста заполните все поля формы!");
-                    request.setAttribute("name", name);
-                    request.setAttribute("count", count);
-                    request.setAttribute("quantity", quantity);
+            case "/setRoleToUser":
+                String roleId = request.getParameter("roleId");
+                String userId = request.getParameter("userId");
+                if ("".equals(roleId) || roleId == null
+                        || "".equals(userId) || userId == null){
                     
-                    request.getRequestDispatcher("addProduct").forward(request, response);
-                    break;
+                    request.setAttribute("roleId", roleId);
+                    request.setAttribute("userId", userId);
+                    request.setAttribute("info", "Выберите все поля!");
+                    request.getRequestDispatcher(LoginServlet.pathToJsp.getString("adminPanel")).forward(request, response);
                 }
-                Product product = new Product( name, Integer.parseInt(count) , Integer.parseInt(quantity));
-                productFacade.create(product);
-                request.setAttribute("info","Добавлен товар" + product.toString());
-                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("index")).forward(request, response);
+                Role r = roleFacade.find(Long.parseLong(roleId));
+                User u = userFacade.find(Long.parseLong(userId));
+                userRolesFacade.setRoleToUser(r,u);               
+                request.setAttribute("info", "Роль назначена");
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("adminPanel")).forward(request, response);
                 break;
-                
-            case "/editProductForm":
-                String productId = request.getParameter("productId");
-                product = productFacade.find(Long.parseLong(productId));
-                request.setAttribute("product", product);
-                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("editProduct")).forward(request, response);
-                break;
-                
-            case "/editProduct": 
-                productId = request.getParameter("productId");
-                product = productFacade.find(Long.parseLong(productId));
-                name = request.getParameter("name");
-                count = request.getParameter("count");
-                quantity = request.getParameter("quantity");
-                if("".equals(name) || name == null 
-                        || "".equals(count) || count == null
-                        || "".equals(quantity) || quantity == null){
-                    request.setAttribute("info","Поля не должны быть пустыми");
-                    request.setAttribute("productId", product.getId());
-                    request.getRequestDispatcher("/editProductForm").forward(request, response);
-                    break; 
-                }
-                product.setName(name);
-                product.setCount(Integer.parseInt(count));
-                product.setQuantity(Integer.parseInt(quantity));
-                productFacade.edit(product);
-                request.setAttribute("info","Товар отредактирован");
-                request.setAttribute("productId", product.getId());
-                request.getRequestDispatcher("/editProductForm").forward(request, response);         
-                break;  
-                                                          
+        }
     }
-        
-    }
-    
+
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.

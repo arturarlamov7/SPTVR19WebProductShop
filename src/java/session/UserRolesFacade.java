@@ -5,7 +5,11 @@
  */
 package session;
 
+import entity.Role;
+import entity.User;
 import entity.UserRoles;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -28,5 +32,44 @@ public class UserRolesFacade extends AbstractFacade<UserRoles> {
     public UserRolesFacade() {
         super(UserRoles.class);
     }
+
+    public boolean isRole(String roleName, User user) {
+        try {
+           UserRoles userRoles = (UserRoles) em.createQuery("SELECT userRoles FROM UserRoles userRoles WHERE userRoles.role.roleName = :roleName AND userRoles.user = :user")
+                   .setParameter("roleName", roleName)
+                   .setParameter("user", user)  //placeholders
+                   .getSingleResult();
+           return true;
+        } catch (Exception e) {
+            return false;
+        }
+
+    }
+
+    public List<Role> getRolesForUser(User user) {
+        try {
+            return em.createQuery("SELECT ur.r FROM UserRoles ur WHERE ur.user = :user")
+                    .setParameter("user", user)
+                    .getResultList();
+        } catch (Exception e) {
+            return new ArrayList<>();
+            
+        }
+    }
+
+    public void setRoleToUser(Role r, User u) {
+        if (!this.isRole(r.getRoleName(), u)) {
+            this.setRoleToUser(r, u);          
+        }
+    }
+    public void removeRoleFromUser(Role r, User u){
+        if (this.isRole(r.getRoleName(), u)) {
+            em.createQuery("DELETE FROM UserRoles ur WHERE ur.user = :user AND ur.role -= :role ")
+                    .setParameter("user", u)
+                    .setParameter("role", r)
+                    .executeUpdate();
+        }
+    }
+
     
 }

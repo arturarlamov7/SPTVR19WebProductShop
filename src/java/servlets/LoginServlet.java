@@ -13,6 +13,7 @@ import entity.UserRoles;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.ResourceBundle;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -35,7 +36,7 @@ import session.UserRolesFacade;
     "/showLoginForm",
     "/login",
     "/logout",
-    "/addPerson",
+    "/addPersonForm",
     "/createPerson",
     "/listProducts"
 })
@@ -50,26 +51,31 @@ public class LoginServlet extends HttpServlet {
     private HistoryFacade historyFacade;
     @EJB private RoleFacade roleFacade;
     @EJB private UserRolesFacade userRolesFacade;
+    
+    public static final ResourceBundle pathToJsp = ResourceBundle.getBundle("property.pathToJsp");
    
     @Override
     public void init() throws ServletException {
         super.init(); 
-        if(userFacade.findAll().size() > 0) return;
+        if(userFacade.findAll().size() > 0) return; //return - выход из метода
         //Super Admin
         Person person = new Person("Artur", "Arlamov", "58592275", 100);
         personFacade.create(person);
         User user = new User ("admin", "12345", person);
         userFacade.create(user);
         UserRoles userRoles = new UserRoles();
+        
         userRoles.setUser(user);
         Role role = new Role ("ADMINISTRATOR");
         roleFacade.create(role);
         userRoles.setRole(role);
         userRolesFacade.create(userRoles);
+        
         role = new Role ("MANAGER");
         roleFacade.create(role);
         userRoles.setRole(role);
         userRolesFacade.create(userRoles);
+        
         role = new Role ("CUSTOMER");
         roleFacade.create(role);
         userRoles.setRole(role);
@@ -100,7 +106,7 @@ public class LoginServlet extends HttpServlet {
         
         switch (path) {
             case "/showLoginForm":
-                request.getRequestDispatcher("/WEB-INF/showLoginForm.jsp").forward(request, response); 
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("login")).forward(request, response); 
                 break;
             case "/login":
                 String login = request.getParameter("login");
@@ -119,7 +125,7 @@ public class LoginServlet extends HttpServlet {
                 HttpSession session = request.getSession(true); //создаем сессию
                 session.setAttribute("user", user);
                 request.setAttribute("info", "Вы вошли!");
-                request.getRequestDispatcher("/index.jsp").forward(request, response); 
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("index")).forward(request, response); 
                 break;
             case "/logout":
                 session = request.getSession(false); //сессия создаваться не будет
@@ -127,10 +133,10 @@ public class LoginServlet extends HttpServlet {
                     session.invalidate();
                 }
                 request.setAttribute("info", "Вы вышли!");
-                request.getRequestDispatcher("/index.jsp").forward(request, response); 
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("index")).forward(request, response); 
                 break;
             case "/addPerson":
-                request.getRequestDispatcher("/WEB-INF/addPersonForm.jsp").forward(request, response); 
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("addPersonForm")).forward(request, response); 
                 break;
                 
             case "/createPerson":             
@@ -163,14 +169,17 @@ public class LoginServlet extends HttpServlet {
                 personFacade.create(person);
                 user = new User(login, password, person); //создаем пользоветеля и указываем что это покупатель
                 userFacade.create(user);
+                Role rolePerson = roleFacade.findByName("CUSTOMER");
+                UserRoles userRoles = new UserRoles(user, rolePerson);
+                userRolesFacade.create(userRoles);
                 request.setAttribute("info","Добавлен новый покупатель" + person.toString());
-                request.getRequestDispatcher("/index.jsp").forward(request, response);               
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("index")).forward(request, response);               
                 break;
                 
             case "/listProducts":
                 List<Product> listProducts = productFacade.findAll();
                 request.setAttribute("listProducts", listProducts);
-                request.getRequestDispatcher("/WEB-INF/listProducts.jsp").forward(request, response);
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("listProducts")).forward(request, response);
                 break;
         }
 

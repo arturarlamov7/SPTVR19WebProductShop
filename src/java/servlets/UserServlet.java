@@ -23,6 +23,7 @@ import session.HistoryFacade;
 import session.PersonFacade;
 import session.ProductFacade;
 import session.UserFacade;
+import session.UserRolesFacade;
 
 
 /**
@@ -45,6 +46,7 @@ public class UserServlet extends HttpServlet {
     private HistoryFacade historyFacade;
     @EJB
     private UserFacade userFacade;
+    @EJB private UserRolesFacade userRolesFacade;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -63,7 +65,7 @@ public class UserServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         if(session == null) {
             request.setAttribute("info", "У вас нет прав! Пожалуйста войдите в систему!");
-            request.getRequestDispatcher("/WEB-INF/showLoginForm.jsp").forward(request, response); 
+            request.getRequestDispatcher("showLoginForm").forward(request, response); 
             return;   
         }
         
@@ -71,8 +73,14 @@ public class UserServlet extends HttpServlet {
         
         if (user == null) {
             request.setAttribute("info", "У вас нет прав! Пожалуйста войдите в систему!");
-            request.getRequestDispatcher("/WEB-INF/showLoginForm.jsp").forward(request, response); 
+            request.getRequestDispatcher("showLoginForm").forward(request, response); 
             return;
+        }
+        boolean isRole = userRolesFacade.isRole("CUSTOMER", user);
+        if(!isRole ){
+            request.setAttribute("info", "У вас нет прав! Пожалуйста войдите в систему!");
+            request.getRequestDispatcher("showLoginForm").forward(request, response); 
+            return;       
         }
         String path = request.getServletPath();
         
@@ -80,7 +88,9 @@ public class UserServlet extends HttpServlet {
             case "/buyProductForm":
                 List<Product> listProducts = productFacade.findAll();
                 request.setAttribute("listProducts", listProducts);
-                request.getRequestDispatcher("/WEB-INF/buyProductForm.jsp").forward(request, response);
+                List<Product> listBuyProducts = historyFacade.findBuyProduct(user.getPerson());
+                request.setAttribute("listBuyProducts", listBuyProducts);
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("buyProduct")).forward(request, response);
                 break;
                 
             case "/buyProduct":
@@ -98,13 +108,13 @@ public class UserServlet extends HttpServlet {
                 History history = new History(person, product, new GregorianCalendar().getTime());
                 historyFacade.create(history);               
                 request.setAttribute("info", "Товар куплен!");
-                request.getRequestDispatcher("/index.jsp").forward(request, response);
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("index")).forward(request, response);
                 break;
                                    
             case "/addMoneyToPerson":
                 List<Person>listPersons = personFacade.findAll();
                 request.setAttribute("listPersons", listPersons);
-                request.getRequestDispatcher("/WEB-INF/addMoneyToPerson.jsp").forward(request, response);
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("addMoney")).forward(request, response);
                 break;
                 
             case "/addMoney":
@@ -126,7 +136,7 @@ public class UserServlet extends HttpServlet {
                 personFacade.edit(person);
 
                 request.setAttribute("info", "Кошелек пополнен!");
-                request.getRequestDispatcher("index.jsp").forward(request, response);
+                request.getRequestDispatcher(LoginServlet.pathToJsp.getString("index")).forward(request, response);
                 break;                           
         }   
     }

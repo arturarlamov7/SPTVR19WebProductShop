@@ -5,23 +5,10 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Product Shop</title>
-    </head>
-    <body>
-        <div>Arlamov Product Shop</div>
-        <p>${info}</p>
-        <br>
-        <a href="showLoginForm">Войти</a></br>
-        <a href="logout">Выйти</a></br>
-        <a href="addProduct">Добавить товар</a></br>
-        <a href="addPerson">Зарегестрироваться</a></br>
-        <a href="listProducts">Список товаров</a></br>
-        <a href="listPersons">Список покупателей</a></br>
-        <a href="buyProduct">Купить товар</a></br>
-        <a href="addMoney">Пополнить баланс</a></br> 
-    </body>
-</html>
+
+<p class="m-2 w-100 text-center">Добро пожаловать в мой магазин Arlamov Product Shop.</p>
+
+    
+        
+
+

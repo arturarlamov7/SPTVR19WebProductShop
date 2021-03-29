@@ -6,15 +6,9 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Пополнить баланс покупателя</title>
-        
-    </head>
-    <body>
-        <h1>Пополнить баланс покупателя</h1>
+
+
+        <h3>Пополнить баланс покупателя</h3>
         <p>${info}</p>
         <form action="addMoney" method="POST">
         <h2>Список покупателей</h2>
@@ -27,5 +21,4 @@
         Сколько денег?: <input type="number" name="money" min="1" placeholder="количество">
         <input type="submit" value="пополнить кошелек">
         </form>
-    </body>
-</html>
+
